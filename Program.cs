@@ -128,9 +128,13 @@ app.MapPost("/api/evaluate", async (Dictionary<int, int> answers) =>
 
     ## **[Insert Specialized Career Title]**
 
-    *   **Why This Fits You:** Connect their unique behavioral traits, natural talents, and problem-solving styles into a compelling narrative explaining why they would thrive in this niche. 
-    *   **A Day in Your Life:** Paint a vivid, exciting picture of what their day-to-day work, environment, and projects would actually look like.
+    *   **Why This Fits You:** Connect their unique behavioral traits, natural talents, and problem-solving styles into a compelling narrative explaining why they would thrive in this job. Highlight the specific aspects of their profile that align with the demands and rewards of this career.
+    *   **Where will you work?** Describe the types of companies, organizations, or industries they would likely find themselves in. Be specific about the work culture, team dynamics, and mission of these workplaces to give them a clear vision of their future environment.
+    *   **A Day in Your Life:** Paint a vivid, exciting picture of what their day-to-day work, environment, and projects would actually look like. Be specific about what expectations they should have when it comes to  tasks, work setting, salary range, and the types of problems they would be solving. This should be aspirational but also grounded in reality to give them a clear vision of what they are working towards.
     *   **The Challenge & The Growth Strategy:** Identify one potential hurdle they might face in this role based on their personality, and give them a concrete strategy to overcome it.
+    - NOTE: Be specific about the daily tasks, work environment, and types of projects they would be working on. Avoid generic descriptions that could apply to any job. The more vivid and detailed, the better.
+    - Do Not be too detailed that it becomes overwhelming or discouraging. The goal is to inspire and excite them about the possibilities, not to intimidate them with a laundry list of qualifications or daily tasks.
+    after the three career paths, include a final section that synthesizes their overall profile into a cohesive narrative, highlighting their unique strengths and how they can leverage them in any career they choose. This should be a motivational conclusion that empowers them to take ownership of their future and pursue the path that excites them the most.
     ---
     Student Profile Multi-Vector Telemetry Data (use descriptively, never quote these numbers):
     - Comfort with Ambiguity: {metrics["ambiguityTolerance"]} (Higher = thrives in chaos; Lower = needs rules)
