@@ -23,7 +23,7 @@ var questions = new List<Question>
     new(" You look at your locker or backpack organization.", "Everything is in exact, labeled folders", "Absolute chaos, but I know where things are", "environmentPreference"),
     new(" You read the morning announcements on the board.", "I just skim the main headline", "I immediately notice a spelling typo in the text", "detailFocus"),
     new(" You are listening to a podcast or music on the way to school. What catches your brain?", "Concrete, real-world true stories or news", "Deep, metaphorical concepts or complex lyrical storytelling", "abstractThinking"),
-    
+
     // Phase 2
     new(" 1st Period gives you a major project with NO rubric.", "Panic / Tell me exactly what to do", "Freedom / I love making my own rules", "ambiguityTolerance"),
     new(" You have to learn a complex new software for a class.", "Read the manual / Watch a 30-min tutorial", "Click buttons randomly until it works", "cognitivePace"),
@@ -32,7 +32,7 @@ var questions = new List<Question>
     new(" In Science lab, your experiment fails the textbook result.", "Frustrated the lab is ruined", "Curious to debug the rogue variables", "riskAppetite"),
     new(" You are solving a complex math equation.", "Follow the clean, orderly steps exactly", "Hunt for an unorthodox shortcut", "cognitivePace"),
     new(" You are reviewing peer-reviewed study sheets.", "I trust the summary concept entirely", "I cross-reference the data points and indices to ensure no metrics are missed", "detailFocus"),
-    
+
     // Phase 3
     new(" It's lunchtime. Where do you recharge?", "Quiet library alone or with one person", "The loudest, most crowded table", "socialOrientation"),
     new(" A friend is crying over a major personal problem.", "Analyze the root cause and map out a fix", "Focus entirely on comforting and validating them", "sourceOfTruth"),
@@ -41,7 +41,7 @@ var questions = new List<Question>
     new(" A system or project you are working on breaks.", "Pull up the logs and fix it solo in silence", "Call a group chat to brainstorm out loud", "socialOrientation"),
     new(" You hear a rumor or half-story about some school drama.", "I need to know the exact factual truth immediately", "I'm comfortable not knowing the full context", "ambiguityTolerance"),
     new(" Two friends are having an ideological debate. How do you judge who is right?", "By look at cold, hard empirical data and historical reference", "By assessing who has the more morally sound, empathetic approach", "sourceOfTruth"),
-    
+
     // Phase 4
     new(" If you worked on a movie set, what is your role?", "Production Manager (Budgets, logistics)", "Writer/Director (Creative vision, plot)", "outputFocus"),
     new(" You have free time in the workshop/art room.", "Fixing an old, broken bicycle until it runs", "Sketching a futuristic, brand-new concept car", "outputFocus"),
@@ -50,7 +50,7 @@ var questions = new List<Question>
     new(" You are picked to lead a student committee.", "Backstage operator (Logistics, rules)", "Front-facing leader (Speeches, motivation)", "socialOrientation"),
     new(" You are writing a major essay.", "Detailed bulleted outline first", "Stream of consciousness typing, organize later", "cognitivePace"),
     new(" You have built a functional prototype app or project. What's your next move?", "Spend days polishing the UI, fixing minor alignment issues", "Deploy it instantly, flaws and all, to see if people like the core idea", "outputFocus"),
-    
+
     // Phase 5
     new(" You are playing a strategic video/board game.", "Slow, ultra-defensive, safe strategy", "High-risk, 80% fail rate for an instant win", "riskAppetite"),
     new(" Your teammate makes a catastrophic mistake, ruining the game.", "Deep internal frustration at the ruined order", "Excitement because it just got chaotic", "stressResilience"),
@@ -58,14 +58,25 @@ var questions = new List<Question>
     new(" How do you manage your computer's desktop files?", "Strict, perfectly categorized folders", "Dump it all on the desktop and use the search bar", "environmentPreference"),
     new(" You are reading a mystery book or watching a movie.", "I enjoy the ride at the author's pace", "I actively try to outsmart the plot and guess the ending", "cognitivePace"),
     new(" A teacher assigns a concept your class hasn't covered yet.", "Skip it completely (Needs guardrails)", "Spend 30 minutes online trying to crack it (High risk/reward)", "riskAppetite"),
-    
+
     // Phase 6
     new(" You study a historic global economic crisis. What catches your focus?", "The mechanical timeline of events and specific legislative acts passed", "The underlying systemic flaws and psychological patterns of human greed", "abstractThinking"),
     new(" You are finalizing a video edit or creative digital art piece.", "If the message is clear, it's done. I don't look closer.", "I will spend hours adjusting single frame jumps or individual color pixels", "detailFocus"),
     new(" You are researching a topic online. What is your pattern?", "Open one tab, read it comprehensively from top to bottom before moving on", "Open 15 tabs simultaneously, rapidly scanning and jumping between insights", "cognitivePace"),
     new(" You have to give an important class presentation.", "Write every word down verbatim on index cards and read them safely", "Bring basic bullet points and completely improvise the delivery on stage", "riskAppetite"),
     new(" Your home internet crashes 1 hour before a massive online project submission.", "Instant existential dread and paralysis", "Cold, hyper-focused tactical triage (hotspotting, emailing alternatives)", "stressResilience"),
-    new(" You are playing a new open-world video game with no quest markers.", "Annoyed; I want an explicit mini-map directing my progression", "Thrilled; I prefer wandering without directions to discover my own path", "ambiguityTolerance")
+    new(" You are playing a new open-world video game with no quest markers.", "Annoyed; I want an explicit mini-map directing my progression", "Thrilled; I prefer wandering without directions to discover my own path", "ambiguityTolerance"),
+
+    // Phase 7 — Humanities Metrics
+    new(" You are reading two articles: one is packed with statistics, the other is a personal narrative. Which do you trust more?", "The data and statistics — facts don't lie", "The human story — context and lived experience matter more", "narrativeThinking"),
+    new(" A new law is being debated. How do you evaluate whether it's a good idea?", "By analyzing its measurable outcomes and economic data", "By asking whether it's fair and how it affects vulnerable people", "ethicalOrientation"),
+    new(" You are assigned a history project. What angle excites you most?", "Future implications — what this event changed going forward", "Deep context — understanding the world that made this event happen", "temporalFocus"),
+    new(" When you need to explain a complex idea, what feels most natural?", "Drawing a diagram, chart, or writing structured code/formulas", "Writing an essay, giving a speech, or crafting a metaphor", "expressionMode"),
+    new(" You are watching a documentary. Which topic keeps you glued to the screen?", "How one brilliant individual changed history through their mind", "How entire cultures, economies, or societies rise and collapse", "humanSystemsInterest"),
+    new(" You are editing someone else's writing. What do you notice first?", "Whether the argument is logically structured and factually accurate", "Whether the tone, word choice, and voice feel authentic and powerful", "languageAffinity"),
+    new(" Two people in your friend group are in a serious conflict. What's your instinct?", "Figure out who is objectively right based on what actually happened", "Get both sides talking and help them understand each other's feelings", "conflictApproach"),
+    new(" Why do you learn new things?", "To build something, solve a problem, or create a tangible result", "To understand the world better, even if it leads nowhere practical", "knowledgePursuit"),
+    new(" A philosopher claims that truth is different for every culture. Your reaction?", "That's dangerous relativism — truth must be objective and provable", "That's profound — reality is always filtered through human experience", "structureOfTruth"),
 };
 
 // 2. Endpoint to Serve the HTML Frontend Interactively
@@ -79,7 +90,10 @@ app.MapPost("/api/evaluate", async (Dictionary<int, int> answers) =>
         { "ambiguityTolerance", 0 }, { "socialOrientation", 0 }, { "cognitivePace", 0 },
         { "riskAppetite", 0 }, { "stressResilience", 0 }, { "detailFocus", 0 },
         { "abstractThinking", 0 }, { "sourceOfTruth", 0 }, { "outputFocus", 0 },
-        { "environmentPreference", 0 }
+        { "environmentPreference", 0 }, { "narrativeThinking", 0 }, { "ethicalOrientation", 0 },
+        { "temporalFocus", 0 }, { "expressionMode", 0 }, { "humanSystemsInterest", 0 },
+        { "languageAffinity", 0 }, { "conflictApproach", 0 }, { "knowledgePursuit", 0 },
+        { "structureOfTruth", 0 }
     };
 
     for (int i = 0; i < questions.Count; i++)
@@ -90,30 +104,30 @@ app.MapPost("/api/evaluate", async (Dictionary<int, int> answers) =>
         }
     }
 
-    // RESOLVED: Disambiguated System.Environment from Google.GenAI.Types.Environment
-    var apiKey = System.Environment.GetEnvironmentVariable("GEMINI_API_KEY") 
-    ?? throw new InvalidOperationException("GEMINI_API_KEY is not set.");
+    var apiKey = System.Environment.GetEnvironmentVariable("GEMINI_API_KEY")
+        ?? throw new InvalidOperationException("GEMINI_API_KEY is not set.");
 
     var client = new Client(apiKey: apiKey);
     string systemPrompt = $"""
-    You are an elite psychometric career strategist, talent mythologist, and workforce futurist. Your task is to analyze a high school student's psychological profile, execution style, and problem-solving metrics derived from a 40-question behavioral simulation. 
-    
-    Provide exactly 3 distinct, highly specialized, and forward-looking career paths tailored to their comprehensive metrics. Do not suggest generic, broad-category jobs (e.g., "Doctor," "Lawyer"). Instead, identify hyper-specific, modern, or emerging niches (e.g., "Bioinformatics Pipeline Architect," "Quantitative Behavioral Economist").
-    
+    You are an elite psychometric career strategist, talent mythologist, and workforce futurist. Your task is to analyze a high school student's psychological profile, execution style, and problem-solving metrics derived from a 49-question behavioral simulation.
+
+    Provide exactly 3 distinct, highly specialized, and forward-looking career paths tailored to their comprehensive metrics. Do not suggest generic, broad-category jobs (e.g., "Doctor," "Lawyer"). Instead, identify hyper-specific, modern, or emerging niches (e.g., "Bioinformatics Pipeline Architect," "Quantitative Behavioral Economist," "Conflict Narrative Journalist," "Restorative Justice Policy Architect").
+
     Formatting & Style Rules:
-    - Tone: Empowering, analytical, and sophisticated, yet accessible to an ambitious high school student. 
+    - Tone: Empowering, analytical, and sophisticated, yet accessible to an ambitious high school student.
     - Perspective: Speak directly to them using "You" and "Your."
     - Structure: Use clear markdown headings, bullet points, and horizontal rules to separate the career paths.
     - Visuals: Bold the career names and critical psychological triggers.
-    
+    - CRITICAL: Never mention raw numbers, scores, or metric values in your response. Translate all metrics into descriptive language only (e.g., say "your strong empathetic orientation" not "your sourceOfTruth score of +12").
+
     For Each Career Path, Provide:
     1. ## **[Insert Hyper-Specialized Career Title]**
-    2. **The Matrix Synthesis (Why It Fits):** Explain how specific clusters of their telemetry data cross-reference to make them uniquely suited for this role. (E.g., "Your high ambiguity tolerance combined with your rapid cognitive pace makes you ideal for roles that require quick decision-making in uncertain environments, such as...") and avoid listing all the metrics in a dry format. Instead, weave them into a compelling narrative that connects their psychological profile to the demands and rewards of the career.
+    2. **The Matrix Synthesis (Why It Fits):** Explain how specific clusters of their telemetry data cross-reference to make them uniquely suited for this role. Weave the metrics into a compelling narrative — never list them as dry numbers or scores.
     3. **Your Day-to-Day Architecture:** Paint a vivid picture of what they would actually be doing.
-    4. **The Friction Point & Safeguard:** Identify one potential point of friction based on their metrics and give them a concrete strategy to mitigate it.
-    
+    4. **The Friction Point & Safeguard:** Identify one potential point of friction based on their profile and give them a concrete strategy to mitigate it.
+
     ---
-    Student Profile Multi-Vector Telemetry Data:
+    Student Profile Multi-Vector Telemetry Data (use descriptively, never quote these numbers):
     - Comfort with Ambiguity: {metrics["ambiguityTolerance"]} (Higher = thrives in chaos; Lower = needs rules)
     - Social Orientation: {metrics["socialOrientation"]} (Negative = Independent/Backstage; Positive = Collaborative/Public)
     - Cognitive Pace: {metrics["cognitivePace"]} (Negative = Methodical/Deliberate; Positive = Rapid/Trial-and-Error)
@@ -124,6 +138,15 @@ app.MapPost("/api/evaluate", async (Dictionary<int, int> answers) =>
     - Source of Truth: {metrics["sourceOfTruth"]} (Negative = Data-Driven/Specs; Positive = Intuitive/Empathetic)
     - Output Focus: {metrics["outputFocus"]} (Negative = Optimizer/Organizer; Positive = Builder/Creative Visionary)
     - Environment Preference: {metrics["environmentPreference"]} (Negative = Structured/Guardrails; Positive = Fluid/Dynamic)
+    - Narrative Thinking: {metrics["narrativeThinking"]} (Negative = Data/Logic driven; Positive = Story/Meaning driven)
+    - Ethical Orientation: {metrics["ethicalOrientation"]} (Negative = Rule-based/Consequentialist; Positive = Empathy-based/Relational)
+    - Temporal Focus: {metrics["temporalFocus"]} (Negative = Future-oriented/Innovative; Positive = Historically/Contextually grounded)
+    - Expression Mode: {metrics["expressionMode"]} (Negative = Visual/Numerical/Spatial; Positive = Verbal/Written/Rhetorical)
+    - Human Systems Interest: {metrics["humanSystemsInterest"]} (Negative = Individual psychology; Positive = Societal/Cultural systems)
+    - Language Affinity: {metrics["languageAffinity"]} (Negative = Logic/Structure focused; Positive = Tone/Voice/Nuance focused)
+    - Conflict Approach: {metrics["conflictApproach"]} (Negative = Objective/Analytical resolution; Positive = Dialogue/Mediation focused)
+    - Knowledge Pursuit: {metrics["knowledgePursuit"]} (Negative = Applied/Practical learning; Positive = Interpretive/Philosophical learning)
+    - Structure of Truth: {metrics["structureOfTruth"]} (Negative = Objective/Empirical; Positive = Relativist/Contextual)
     """;
 
     try
@@ -138,8 +161,7 @@ app.MapPost("/api/evaluate", async (Dictionary<int, int> answers) =>
             }
         );
 
-        // RESOLVED: Added null-safety chaining to eliminate CS8602 warning structures safely
-        string reportText = response?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text 
+        string reportText = response?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text
                             ?? "No assessment report was generated by the AI engine. Please check inputs.";
 
         return Results.Json(new { report = reportText });
@@ -181,14 +203,14 @@ string GetHtmlContent(List<Question> questionSet)
                 <div class="relative z-10 flex w-full items-center py-6 px-8">
                     <span class="text-5xl font-bold text-black mr-6">1</span>
                     
-                        <input type="range" min="1" max="10" value="5.5" step="any" name="q_{{index}}" class="custom-slider w-full mx-2">
+                    <input type="range" min="1" max="10" value="5.5" step="any" name="q_{{index}}" class="custom-slider w-full mx-2">
                     
                     <span class="text-5xl font-bold text-white ml-6">10</span>
                 </div>
             </div>
 
         </div>
-    """)); 
+    """));
 
     return $$"""
     <!DOCTYPE html>
@@ -200,36 +222,30 @@ string GetHtmlContent(List<Question> questionSet)
         <script src="https://cdn.tailwindcss.com"></script>
         <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
         <style>
-            /* Force DejaVu Serif, fallback to standard serif if not installed locally */
             body {
                 background-color: #121212;
                 font-family: 'DejaVu Serif', Georgia, serif;
             }
-            
-            /* Custom Range Slider Styling to match image */
             .custom-slider {
                 -webkit-appearance: none;
                 appearance: none;
                 background: transparent;
                 cursor: pointer;
             }
-
             .custom-slider::-webkit-slider-runnable-track {
                 background: #666666;
                 height: 8px;
                 border-radius: 4px;
             }
-
             .custom-slider::-moz-range-track {
                 background: #666666;
                 height: 8px;
                 border-radius: 4px;
             }
-
             .custom-slider::-webkit-slider-thumb {
                 -webkit-appearance: none;
                 appearance: none;
-                margin-top: -12px; /* Centers thumb on the track */
+                margin-top: -12px;
                 background-color: #222222;
                 height: 32px;
                 width: 32px;
@@ -237,7 +253,6 @@ string GetHtmlContent(List<Question> questionSet)
                 border: 2px solid #ffffff;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             }
-
             .custom-slider::-moz-range-thumb {
                 background-color: #222222;
                 height: 32px;
@@ -316,5 +331,5 @@ string GetHtmlContent(List<Question> questionSet)
     """;
 }
 
-// 5. C# Type Definitions (Must strictly sit at the absolute end of a top-level file)
+// 5. C# Type Definitions
 public record Question(string Text, string LowLabel, string HighLabel, string MetricKey);
