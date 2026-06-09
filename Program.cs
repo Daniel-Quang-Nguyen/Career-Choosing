@@ -273,7 +273,7 @@ string GetHtmlContent(List<Question> questionSet)
                 <h1 class="text-4xl sm:text-6xl font-black tracking-tight text-white mb-6 font-sans">
                     CAREER TRAJECTORY ASSESSMENT
                 </h1>
-                <p class="text-gray-400 text-xl font-medium font-sans">Discover your hyper-specialized future path using predictive AI metrics.</p>
+                <p class="text-gray-400 text-xl font-medium font-sans">Adjust the sliders to reflect your interests and strengths.</p>
             </header>
 
             <form id="quizForm" class="space-y-8">
