@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Google.GenAI;
@@ -13,84 +14,121 @@ using Google.GenAI.Types;
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
-// 1. Data Model for Questions
+// 1. Data Model for Questions (Anti-Bias & De-gendered Version)
 var questions = new List<Question>
 {
     // Phase 1
-    new("Your morning alarm goes off. What does getting ready look like?", "Strict minute-by-minute routine", "Wing it based on how I feel", "environmentPreference"),
-    new("You are picking your outfit for school. What dictates your choice?", "Pure comfort, utility, and weather", "Aesthetics, expression, and the 'vibe'", "sourceOfTruth"),
-    new("You miss the bus or your ride is late. How do you react?", "Deep internal panic", "Instantly adapt and find a new solution", "stressResilience"),
-    new("You walk into a loud, crowded high school hallway.", "Put headphones in and avoid eye contact", "Look around to spot friends and say hi", "socialOrientation"),
-    new("You look at your locker or backpack organization.", "Everything is in exact, labeled folders", "Absolute chaos, but I know where things are", "environmentPreference"),
-    new("You read the morning announcements on the board.", "I just skim the main headline", "I immediately notice a spelling typo in the text", "detailFocus"),
+    new("Your morning alarm goes off. What does getting ready look like?", "Following a structured, predictable routine", "Adjusting my pace based on how I feel that morning", "environmentPreference"),
+    new("You are picking your outfit for school. What dictates your choice?", "Pure comfort, utility, and weather", "Aesthetics, expression, and the overall 'vibe'", "sourceOfTruth"),
+    new("You miss the bus or your ride is late. How do you react?", "Take a moment to process the change before figuring it out", "Immediately shift focus to finding an alternative option", "stressResilience"),
+    new("You walk into a loud, crowded high school hallway.", "Keep to myself and head straight to my destination", "Look around to spot friends and say hi", "socialOrientation"),
+    new("You look at your locker or backpack organization.", "Everything is in exact, labeled folders", "Items are loosely placed, but I know where everything is", "environmentPreference"),
+    new("You read the morning announcements on the board.", "I focus on gathering the main headline", "I naturally notice small formatting or spelling details", "detailFocus"),
     new("You are listening to a podcast or music on the way to school. What catches your brain?", "Concrete, real-world true stories or news", "Deep, metaphorical concepts or complex lyrical storytelling", "abstractThinking"),
 
     // Phase 2
-    new("1st Period gives you a major project with NO rubric.", "Panic / Tell me exactly what to do", "Freedom / I love making my own rules", "ambiguityTolerance"),
-    new("You have to learn a complex new software for a class.", "Read the manual / Watch a 30-min tutorial", "Click buttons randomly until it works", "cognitivePace"),
+    new("1st Period gives you a major project with NO rubric.", "I prefer having clear guidelines and criteria to follow", "I welcome the flexibility to design my own approach", "ambiguityTolerance"),
+    new("You have to learn a complex new software for a class.", "Read the documentation or watch a comprehensive tutorial first", "Explore the interface hands-on to see how it reacts", "cognitivePace"),
     new("Which class discussion makes your brain light up?", "Calculating physical, concrete measurements", "Debating an abstract philosophical question", "abstractThinking"),
-    new("In History, you analyze an event from a perspective you disagree with.", "Frustrating / I prefer objective facts", "Effortless / I like exploring alternate views", "ambiguityTolerance"),
-    new("In Science lab, your experiment fails the textbook result.", "Frustrated the lab is ruined", "Curious to debug the rogue variables", "riskAppetite"),
-    new("You are solving a complex math equation.", "Follow the clean, orderly steps exactly", "Hunt for an unorthodox shortcut", "cognitivePace"),
-    new("You are reviewing peer-reviewed study sheets.", "I trust the summary concept entirely", "I cross-reference the data points and indices to ensure no metrics are missed", "detailFocus"),
+    new("In History, you analyze an event from a perspective you disagree with.", "I prefer focusing on established, objective facts", "I find value in exploring contrasting viewpoints", "ambiguityTolerance"),
+    new("In Science lab, your experiment fails the textbook result.", "Focus on correcting the procedure to achieve the expected result", "Investigate the unexpected variables to see why it diverged", "riskAppetite"),
+    new("You are solving a complex math equation.", "Follow the clean, orderly steps exactly", "Look for an unorthodox or creative shortcut", "cognitivePace"),
+    new("You are reviewing peer-reviewed study sheets.", "I trust the high-level summary concept entirely", "I cross-reference the data points and indices to ensure no metrics are missed", "detailFocus"),
 
     // Phase 3
-    new("It's lunchtime. Where do you recharge?", "Quiet library alone or with one person", "The loudest, most crowded table", "socialOrientation"),
-    new("A friend is crying over a major personal problem.", "Analyze the root cause and map out a fix", "Focus entirely on comforting and validating them", "sourceOfTruth"),
-    new("You and your friends plan a weekend hangout.", "Strict itinerary of where to go and when", "Just show up and figure it out", "environmentPreference"),
-    new("Your friend group suddenly changes plans 5 minutes before meeting.", "I hate last-minute disruptions", "I don't mind, go with the flow", "stressResilience"),
-    new("A system or project you are working on breaks.", "Pull up the logs and fix it solo in silence", "Call a group chat to brainstorm out loud", "socialOrientation"),
-    new("You hear a rumor or half-story about some school drama.", "I need to know the exact factual truth immediately", "I'm comfortable not knowing the full context", "ambiguityTolerance"),
-    new("Two friends are having an ideological debate. How do you judge who is right?", "By look at cold, hard empirical data and historical reference", "By assessing who has the more morally sound, empathetic approach", "sourceOfTruth"),
+    new("It's lunchtime. Where do you recharge?", "A quiet space alone or with one close friend", "A lively, energetic area with a larger group", "socialOrientation"),
+    new("A friend is sharing a major personal problem with you.", "Analyze the root cause and help map out a practical fix", "Focus entirely on comforting, listening, and validating them", "sourceOfTruth"),
+    new("You and your friends plan a weekend hangout.", "A structured itinerary of where to go and when", "A flexible plan where we figure things out as we go", "environmentPreference"),
+    new("Your friend group suddenly changes plans 5 minutes before meeting.", "I prefer sticking to the originally agreed schedule", "I am completely comfortable adapting to the new plan", "stressResilience"),
+    new("A system or project you are working on breaks.", "Review the logs and troubleshoot it independently in silence", "Start a group conversation to brainstorm solutions out loud", "socialOrientation"),
+    
+    // ATTENTION CHECK 1: Chống lỗi bất cẩn bấm đại (Carelessness Bias)
+    new("To ensure you are reading carefully, please drag the slider completely to the LEFT.", "I am reading carefully", "I am skipping questions", "attentionCheck_Left"),
+
+    new("You hear a rumor or half-story about some school drama.", "I prefer knowing the exact, factual truth right away", "I am comfortable letting it go without needing the full context", "ambiguityTolerance"),
+    new("Two people are having an ideological debate. How do you judge who is right?", "By evaluating cold, hard empirical data and historical references", "By assessing who has the more compassionate and morally sound approach", "sourceOfTruth"),
 
     // Phase 4
-    new("If you worked on a movie set, what is your role?", "Production Manager (Budgets, logistics)", "Writer/Director (Creative vision, plot)", "outputFocus"),
-    new("You have free time in the workshop/art room.", "Fixing an old, broken bicycle until it runs", "Sketching a futuristic, brand-new concept car", "outputFocus"),
-    new("You are building a complex LEGO set.", "Follow the instruction manual page-by-page", "Look at the box photo and build a custom version", "environmentPreference"),
-    new("Your group project partner ghosted you the night before it's due.", "Complete breakdown/panic", "Laser-focused execution under pressure", "stressResilience"),
-    new("You are picked to lead a student committee.", "Backstage operator (Logistics, rules)", "Front-facing leader (Speeches, motivation)", "socialOrientation"),
-    new("You are writing a major essay.", "Detailed bulleted outline first", "Stream of consciousness typing, organize later", "cognitivePace"),
-    new("You have built a functional prototype app or project. What's your next move?", "Spend days polishing the UI, fixing minor alignment issues", "Deploy it instantly, flaws and all, to see if people like the core idea", "outputFocus"),
+    new("If you worked on a creative project, what is your role?", "Production Manager (Budgets, schedules, and logistics)", "Writer/Director (Creative vision, overarching plot)", "outputFocus"),
+    
+    // GENDER BIAS FIX: Bối cảnh phi giới tính hóa
+    new("You have free time in a creative workshop or design studio.", "Optimizing and repairing an old, broken system until it runs smoothly", "Drafting a completely new, experimental concept from scratch", "outputFocus"),
+    
+    new("You are building a complex LEGO set.", "Follow the instruction manual page-by-page", "Look at the box photo and assemble a custom version", "environmentPreference"),
+    new("Your group project partner cannot contribute the night before it's due.", "Carefully adjust the remaining workload to handle the fallout step-by-step", "Channel the urgency into highly focused, direct execution", "stressResilience"),
+    new("You are picked to lead a student committee.", "Backstage coordinator (Managing logistics, operations, and rules)", "Front-facing leader (Delivering speeches, setting vision, and motivation)", "socialOrientation"),
+    new("You are writing a major essay.", "Creating a detailed, bulleted outline before drafting", "Writing continuously to capture ideas, then organizing them later", "cognitivePace"),
+    new("You have built a functional prototype app or project. What's your next move?", "Spend extra time polishing the interface and aligning minor details", "Launch it immediately to gather feedback on the core concept", "outputFocus"),
 
     // Phase 5
-    new("You are playing a strategic video/board game.", "Slow, ultra-defensive, safe strategy", "High-risk, 80% fail rate for an instant win", "riskAppetite"),
-    new("Your teammate makes a catastrophic mistake, ruining the game.", "Deep internal frustration at the ruined order", "Excitement because it just got chaotic", "stressResilience"),
-    new("You are shopping for a new laptop or phone.", "Comparing numerical spec sheets/benchmarks", "Beautiful design, color, and user 'vibe'", "sourceOfTruth"),
-    new("How do you manage your computer's desktop files?", "Strict, perfectly categorized folders", "Dump it all on the desktop and use the search bar", "environmentPreference"),
-    new("You are reading a mystery book or watching a movie.", "I enjoy the ride at the author's pace", "I actively try to outsmart the plot and guess the ending", "cognitivePace"),
-    new("A teacher assigns a concept your class hasn't covered yet.", "Skip it completely (Needs guardrails)", "Spend 30 minutes online trying to crack it (High risk/reward)", "riskAppetite"),
+    new("You are playing a strategic video/board game.", "A measured, defensive strategy that minimizes mistakes", "A bold, dynamic strategy with high risks but immediate rewards", "riskAppetite"),
+    new("Your teammate makes a significant mistake, altering the game dynamic.", "Feel standard disappointment that the established order was disrupted", "See it as an interesting new tactical puzzle to solve", "stressResilience"),
+    new("You are shopping for a new laptop or phone.", "Comparing numerical spec sheets, performance, and benchmarks", "Evaluating the overall industrial design, color, and user experience", "sourceOfTruth"),
+    new("How do you manage your computer's desktop files?", "Strictly organized into clearly labeled folders", "Keep files easily accessible on the desktop and rely on the search bar", "environmentPreference"),
+    new("You are reading a mystery book or watching a movie.", "I enjoy following the story organically at the author's pace", "I actively try to analyze the clues and deduce the ending ahead of time", "cognitivePace"),
+    new("A teacher assigns a concept your class hasn't covered yet.", "Wait for formal instruction or guidelines before attempting it", "Spend time exploring resources independently to decipher it", "riskAppetite"),
+
+    // ATTENTION CHECK 2: Gài bẫy ở pha mệt mỏi
+    new("To verify your focus, please drag the slider completely to the RIGHT.", "I am clicking blindly", "I am fully engaged", "attentionCheck_Right"),
 
     // Phase 6
-    new("You study a historic global economic crisis. What catches your focus?", "The mechanical timeline of events and specific legislative acts passed", "The underlying systemic flaws and psychological patterns of human greed", "abstractThinking"),
-    new("You are finalizing a video edit or creative digital art piece.", "If the message is clear, it's done. I don't look closer.", "I will spend hours adjusting single frame jumps or individual color pixels", "detailFocus"),
-    new("You are researching a topic online. What is your pattern?", "Open one tab, read it comprehensively from top to bottom before moving on", "Open 15 tabs simultaneously, rapidly scanning and jumping between insights", "cognitivePace"),
-    new("You have to give an important class presentation.", "Write every word down verbatim on index cards and read them safely", "Bring basic bullet points and completely improvise the delivery on stage", "riskAppetite"),
-    new("Your home internet crashes 1 hour before a massive online project submission.", "Instant existential dread and paralysis", "Cold, hyper-focused tactical triage (hotspotting, emailing alternatives)", "stressResilience"),
-    new("You are playing a new open-world video game with no quest markers.", "Annoyed; I want an explicit mini-map directing my progression", "Thrilled; I prefer wandering without directions to discover my own path", "ambiguityTolerance"),
+    new("When you look back at a major historical crisis, what catches your focus?", "The exact timeline, dates, and specific decisions made by leaders", "The big-picture causes, human psychology, and hidden patterns", "abstractThinking"),
+    new("You are finalizing a video edit or creative digital art piece.", "Once the core message is clear, I consider it complete", "I will invest significant time refining individual frames or pixel alignments", "detailFocus"),
+    new("You are researching a topic online. What is your pattern?", "Open one tab, reading it comprehensively from top to bottom before moving on", "Open multiple tabs simultaneously, rapidly scanning and jumping between insights", "cognitivePace"),
+    new("You have to give an important class presentation.", "Write out a detailed script to ensure every point is covered safely", "Use basic bullet points and deliver the explanation naturally on stage", "riskAppetite"),
+    new("Your home internet goes offline 1 hour before a massive project submission.", "Take a brief moment to stabilize the pressure before finding a backup plan", "Immediately switch to tactical troubleshooting (using hotspots or emailing alternatives)", "stressResilience"),
+    new("You are playing a new open-world video game with no quest markers.", "I prefer having a clear map or indicators directing my progression", "I prefer exploring freely without directions to discover my own path", "ambiguityTolerance"),
 
     // Phase 7 — Humanities Metrics
-    new("You are reading two articles: one is packed with statistics, the other is a personal narrative. Which do you trust more?", "The data and statistics — facts don't lie", "The human story — context and lived experience matter more", "narrativeThinking"),
-    new("A new law is being debated. How do you evaluate whether it's a good idea?", "By analyzing its measurable outcomes and economic data", "By asking whether it's fair and how it affects vulnerable people", "ethicalOrientation"),
-    new("You are assigned a history project. What angle excites you most?", "Future implications — what this event changed going forward", "Deep context — understanding the world that made this event happen", "temporalFocus"),
-    new("When you need to explain a complex idea, what feels most natural?", "Drawing a diagram, chart, or writing structured code/formulas", "Writing an essay, giving a speech, or crafting a metaphor", "expressionMode"),
-    new("You are watching a documentary. Which topic keeps you glued to the screen?", "How one brilliant individual changed history through their mind", "How entire cultures, economies, or societies rise and collapse", "humanSystemsInterest"),
-    new("You are editing someone else's writing. What do you notice first?", "Whether the argument is logically structured and factually accurate", "Whether the tone, word choice, and voice feel authentic and powerful", "languageAffinity"),
-    new("Two people in your friend group are in a serious conflict. What's your instinct?", "Figure out who is objectively right based on what actually happened", "Get both sides talking and help them understand each other's feelings", "conflictApproach"),
-    new("Why do you learn new things?", "To build something, solve a problem, or create a tangible result", "To understand the world better, even if it leads nowhere practical", "knowledgePursuit"),
-    new("A philosopher claims that truth is different for every culture. Your reaction?", "That's dangerous relativism — truth must be objective and provable", "That's profound — reality is always filtered through human experience", "structureOfTruth"),
+    new("You are reading two articles: one is packed with statistics, the other is a personal narrative. Which do you trust more?", "The data and statistics — objective metrics provide clarity", "The human story — personal context and lived experiences provide meaning", "narrativeThinking"),
+    new("A new law is being debated. How do you evaluate whether it's a good idea?", "By analyzing its measurable outcomes and economic data", "By asking whether it's fair and how it protects vulnerable communities", "ethicalOrientation"),
+    new("You are assigned a history project. What angle excites you most?", "Future implications — what this event changed going forward", "Deep context — understanding the historical conditions that caused the event", "temporalFocus"),
+    new("When you need to explain a complex idea, what feels most natural?", "Drawing a diagram, chart, or writing structured formulas", "Writing an essay, giving a speech, or crafting a metaphor", "expressionMode"),
+    new("You are watching a documentary. Which topic keeps you glued to the screen?", "How a specific individual changed history through their unique vision", "How entire cultures, economies, or societies rise and evolve collectively", "humanSystemsInterest"),
+    new("You are editing someone else's writing. What do you notice first?", "Whether the argument is logically structured and factually accurate", "Whether the tone, word choice, and voice feel authentic and compelling", "languageAffinity"),
+    new("Two people in your friend group are in a serious conflict. What's your instinct?", "Help determine what objectively happened to identify the root cause", "Facilitate an open conversation to help them understand each other's perspectives", "conflictApproach"),
+    new("Why do you learn new things?", "To build something, solve a problem, or create a tangible result", "To expand my understanding of the world, regardless of practical application", "knowledgePursuit"),
+    new("A philosopher claims that truth is experienced differently by every culture. Your reaction?", "Truth should ideally be objective, verifiable, and universally applicable", "Reality is naturally filtered through human, cultural, and subjective frameworks", "structureOfTruth"),
 };
 
 // 2. Endpoint to Serve the HTML Frontend Interactively
 app.MapGet("/", () => Results.Content(GetHtmlContent(questions), "text/html"));
 
 // 3. Endpoint to Process Responses and Query Gemini
-app.MapPost("/api/evaluate", async (Dictionary<int, int> answers) =>
+// Sử dụng Dictionary<string, int> để tránh lỗi Submission/Binding Error khi đọc file JSON
+app.MapPost("/api/evaluate", async ([FromBody] Dictionary<string, int> rawAnswers) =>
 {
-    var rawMetrics = questions.Select(q => q.MetricKey).Distinct().ToDictionary(k => k, k => 0);
-    var metricMaxCounts = questions.GroupBy(q => q.MetricKey).ToDictionary(g => g.Key, g => g.Count());
+    // Chuyển đổi an toàn từ chuỗi sang số nguyên
+    var answers = new Dictionary<int, int>();
+    foreach (var kvp in rawAnswers)
+    {
+        if (int.TryParse(kvp.Key, out int index))
+        {
+            answers[index] = kvp.Value;
+        }
+    }
+
+    // --- BỘ LỌC CHỐNG BẤT CẨN (CARELESSNESS FILTER) ---
+    for (int i = 0; i < questions.Count; i++)
+    {
+        if (questions[i].MetricKey == "attentionCheck_Left" && answers.TryGetValue(i, out int leftVal) && leftVal > 2)
+        {
+            return Results.Json(new { error = "Please read the questions carefully. It looks like you missed an attention check." }, statusCode: 400);
+        }
+        if (questions[i].MetricKey == "attentionCheck_Right" && answers.TryGetValue(i, out int rightVal) && rightVal < 8)
+        {
+            return Results.Json(new { error = "Please read the questions carefully. It looks like you missed an attention check." }, statusCode: 400);
+        }
+    }
+
+    var activeMetrics = questions.Where(q => !q.MetricKey.StartsWith("attentionCheck")).Select(q => q.MetricKey).Distinct();
+    var rawMetrics = activeMetrics.ToDictionary(k => k, k => 0);
+    var metricMaxCounts = questions.Where(q => !q.MetricKey.StartsWith("attentionCheck")).GroupBy(q => q.MetricKey).ToDictionary(g => g.Key, g => g.Count());
 
     for (int i = 0; i < questions.Count; i++)
     {
+        if (questions[i].MetricKey.StartsWith("attentionCheck")) continue;
+
         if (answers.TryGetValue(i, out int score))
         {
             rawMetrics[questions[i].MetricKey] += (score - 5);
@@ -102,63 +140,74 @@ app.MapPost("/api/evaluate", async (Dictionary<int, int> answers) =>
     {
         int maxPossibleScore = metricMaxCounts[metric.Key] * 4; 
         double percentage = maxPossibleScore == 0 ? 0 : Math.Round(((double)metric.Value / maxPossibleScore) * 100);
-        normalizedMetrics[metric.Key] = $"{percentage}%";
+        string formattedPercent = percentage > 0 ? $"+{percentage}%" : $"{percentage}%";
+        normalizedMetrics[metric.Key] = formattedPercent;
     }
 
     var apiKey = System.Environment.GetEnvironmentVariable("GEMINI_API_KEY")
         ?? throw new InvalidOperationException("GEMINI_API_KEY is not set.");
 
     var client = new Client(apiKey: apiKey);
-    
     var telemetryList = string.Join("\n", normalizedMetrics.Select(m => $"- {m.Key}: {m.Value}"));
 
     string systemPrompt = $$"""
-        You are an elite career strategist, talent coach, and workforce futurist. Your task is to analyze a high school student's behavioral profile derived from a 49-question simulation.
+        You are a friendly, encouraging career mentor. Your task is to analyze a high school student's test results and give them advice.
         
-        The provided telemetry data is normalized on a scale from -100% to +100%. 
-        - A negative percentage indicates a strong preference for the Left Trait (e.g., structured, methodical, concrete, data-driven).
-        - A positive percentage indicates a strong preference for the Right Trait (e.g., fluid, rapid, abstract, narrative-driven).
-        - Near 0% indicates neutrality or adaptability.
+        The provided data is on a scale from -100% to +100%. 
+        - A negative number means they prefer the Left Trait (e.g., structure, facts, rules, planning).
+        - A positive number means they prefer the Right Trait (e.g., freedom, ideas, feelings, adapting).
+        - Near 0% means they are balanced and can do both.
 
-        Based on this telemetry, you must:
-        1. Deduce their "Big Five" (OCEAN) personality profile (Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism). Explain each briefly in the context of their scores.
-        2. Generate exactly 3 distinct, accessible, and forward-looking career paths tailored to their unique profile.
-        3. Generate a small list (4-6) of alternative, distinct "Other Favorable Jobs".
-        4. Provide an empowering final synthesis.
+        Your tasks:
+        1. Explain their "Big Five" (OCEAN) personality profile in simple terms based on their scores.
+        2. Suggest exactly 3 good career paths for them.
+        3. List 4 to 6 other jobs they might like.
+        4. Write a short, happy concluding paragraph to cheer them on.
 
-        CRITICAL BIAS & DIVERSITY GUARDRAILS:
-        - Absolute Zero Bias: Do not favor STEM or technology careers merely because the assessment exists as software. (however, if the telemetry strongly supports it, you can recommend them with a clear rationale).
-        - Radical Diversity: The 3 core career recommendations must NOT be variations of the same industry. Ensure a cross-disciplinary mix based on the telemetry (e.g., if one is analytical/technical, another must be creative/humanities-driven, and another should be social-impact, trades, logistics, or educational).
-        - Grounded Reality: Ensure these are accessible career paths (e.g., Teacher, Urban Planner, Electrician, Social Worker, Supply Chain Manager, Industrial Designer).
+        LANGUAGE AND READABILITY RULES (CRITICAL):
+        - Use CEFR B1-B2 level English ONLY.
+        - Write as if you are talking to a 15-year-old high school student.
+        - Keep sentences short and clear. Use simple, everyday words.
+        - DO NOT use complex words (e.g., use "use" instead of "utilize", "help" instead of "ameliorate", "clear" instead of "lucid").
+        - DO NOT use corporate or academic jargon (No words like "telemetry", "paradigm", "intersectionality", or "synergy").
 
-        Formatting & Style Rules:
-        - Tone: Inspiring, analytical, accessible for a high schooler.
-        - Perspective: Speak directly to them using "You" and "Your."
-        - CRITICAL: Never quote raw numbers, percentages, or metric variables in your output. Translate the telemetry into descriptive natural language.
-        
-        YOU MUST RETURN YOUR RESPONSE AS A VALID JSON OBJECT EXACTLY MATCHING THIS SCHEMA:
+        BIAS & DIVERSITY RULES:
+        - Gender Neutrality: Do not base jobs on boy/girl stereotypes. Focus only on their scores.
+        - Radical Diversity: The 3 core jobs must be very different from each other (e.g., one tech job, one creative job, one hands-on/trade job).
+        - Grounded Reality: Pick normal, real jobs (e.g., Teacher, Plumber, Nurse, App Developer, City Planner) but not too generic (e.g., not just "Engineer" or "Artist" -> it should be more specific). Avoid futuristic jobs that might not exist in 10 years.
+
+        Formatting & Style:
+        - Use "You" and "Your".
+        - Do not show them the math, percentages, or variable names. Just explain what the numbers mean in plain English. (e.g., "You have a strong preference for structure and clear rules" instead of "Your conscientiousness is +80%").
+        - Do not change the five OCEAN trait names, but explain them in simple terms. -> correspond Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism to the traits you have. -> create a scale for each trait and base on that to improve the explanation.
+        - The Ocean profile should be a small paragraph (about 3-4 sentences) for each trait, not just a sentence. Use their scores to explain what they are like and how it might affect their work style and preferences.
+
+
+
+        - CRITICAL: DO NOT change the 5 OCEAN trait names in the final JSON output. They must be exactly "openness", "conscientiousness", "extraversion", "agreeableness", and "neuroticism". The career paths must have the exact fields: "title", "whyThisFits", "workOpportunities", "dayInTheLife", and "challengeAndGrowth". The final output MUST be a valid JSON object with these exact keys and structure.
+        YOU MUST RETURN A VALID JSON OBJECT EXACTLY LIKE THIS:
         {
             "oceanProfile": {
-                "openness": "String describing their Openness",
-                "conscientiousness": "String describing their Conscientiousness",
-                "extraversion": "String describing their Extraversion",
-                "agreeableness": "String describing their Agreeableness",
-                "neuroticism": "String describing their Neuroticism/Stress Resilience"
+                "openness": "Detailed analysis of their intellectual curiosity, creative imagination, and willingness to embrace unconventional ideas and new experiences.",
+                "conscientiousness": "Detailed analysis of their reliability, organizational skills, attention to detail, and ability to stay focused on long-term goals.",
+                "extraversion": "Detailed analysis of their sociability, assertiveness, enthusiasm, and whether they draw energy from interacting with others or from solitude.",
+                "agreeableness": "Detailed analysis of their empathy, trustworthiness, cooperative nature, and how much they prioritize social harmony over personal conflict.",
+                "neuroticism": "Detailed analysis of their emotional stability, resilience under pressure, and susceptibility to experiencing negative emotions like anxiety or mood swings."
             },
             "careerPaths": [
                 {
                     "title": "Job Title",
-                    "whyThisFits": "Paragraph explaining why",
-                    "workEnvironment": "Paragraph on where they will work",
-                    "dayInTheLife": "Paragraph on daily tasks",
-                    "challengeAndGrowth": "Paragraph on a potential hurdle and how to fix it"
+                    "whyThisFits": "A precise psychological justification linking their specific OCEAN scores directly to the core demands of this role. Explain exactly how their cognitive style, social battery, and stress tolerance will give them a competitive advantage—or fulfill them deeply—in this line of work.",
+                    "workOpportunities": "A data-driven market outlook for this role. Identify 2-3 specific high-growth sectors or niche industries where this role is critical. Include realistic entry-level vs. senior salary benchmarks, 5-year growth projections, and name-drop 2 specific, real-world companies or innovative products that utilize this exact role to illustrate market demand.",
+                    "dayInTheLife": "A vivid, chronological breakdown of a typical Tuesday in this role. Detail the exact technical tools, software, or frameworks they will use, the cross-functional team members they will collaborate with (e.g., PMs, engineers, stakeholders), and a realistic look at the operational pace and work environment (remote, hybrid, or high-collaboration).",
+                    "challengeAndGrowth": "An honest breakdown of the most common point of burnout or friction in this role. Identify a specific systemic challenge (e.g., creative blocks, scope creep, stakeholder conflict) and counter it with an advanced, constructive growth strategy or industry-standard coping framework to ensure long-term resilience and career longevity."
                 }
             ],
             "otherFavorableJobs": [ "Job A", "Job B", "Job C", "Job D", "Job E" ],
-            "overallSynthesis": "A motivational concluding paragraph synthesizing their strengths"
+            "overallSynthesis": "A final happy message to motivate them and other paths they could explore in the future. Emphasize that they have many options and that their unique combination of traits can lead to success in various fields. Encourage them to keep an open mind and continue exploring their interests as they grow."
         }
 
-        Telemetry Data:
+        Data to analyze:
         {{telemetryList}}
         """;
 
@@ -166,23 +215,23 @@ app.MapPost("/api/evaluate", async (Dictionary<int, int> answers) =>
     {
         var response = await client.Models.GenerateContentAsync(
             model: "gemini-3.1-flash-lite", 
-            contents: "Analyze my profile telemetry. Ensure zero bias, high career diversity, and generate my tailored JSON.",
+            contents: "Analyze my profile. Use simple B1-B2 English, ensure diverse career options, and return the JSON.",
             config: new GenerateContentConfig
             {
                 SystemInstruction = new Content { Parts = new List<Part> { new() { Text = systemPrompt } } },
-                Temperature = 0.8f,
+                Temperature = 0.7f,
                 ResponseMimeType = "application/json" 
             }
         );
 
         string reportText = response?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text
-                            ?? throw new Exception("No assessment report was generated by the AI engine.");
+                            ?? throw new Exception("No report was generated by the AI.");
 
         return Results.Content(reportText, "application/json");
     }
     catch (Exception ex)
     {
-        return Results.Json(new { error = $"Engine communication error: {ex.Message}" }, statusCode: 500);
+        return Results.Json(new { error = $"Server error: {ex.Message}" }, statusCode: 500);
     }
 });
 
@@ -191,12 +240,10 @@ var port = System.Environment.GetEnvironmentVariable("PORT");
 
 if (string.IsNullOrEmpty(port))
 {
-    // Local Testing: Let standard .NET settings take over (localhost:5000/5001)
     app.Run(); 
 }
 else
 {
-    // Railway Deployment: Bind to their specific dynamic cloud port
     app.Run($"http://0.0.0.0:{port}"); 
 }
 
@@ -236,7 +283,7 @@ string GetHtmlContent(List<Question> questionSet)
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Cognitive Routing Engine</title>
+        <title>Career Discovery Engine</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <style>
             body {
@@ -284,16 +331,16 @@ string GetHtmlContent(List<Question> questionSet)
         <div class="max-w-4xl mx-auto px-4 py-12">
             <header class="text-center mb-12">
                 <h1 class="text-4xl sm:text-6xl font-black tracking-tight text-white mb-6 font-sans">
-                    CAREER TRAJECTORY ASSESSMENT
+                    YOUR CAREER PATH
                 </h1>
-                <p class="text-gray-400 text-xl font-medium font-sans">Adjust the sliders to reflect your interests and strengths.</p>
+                <p class="text-gray-400 text-xl font-medium font-sans">Move the sliders to show what fits you best</p>
             </header>
 
             <form id="quizForm" class="space-y-8">
                 {{listHtml}}
                 <div class="text-center pt-8">
                     <button type="submit" id="submitBtn" class="w-full sm:w-auto bg-black hover:bg-gray-800 text-white font-bold px-12 py-5 rounded-xl shadow-lg transform transition active:scale-95 text-xl font-sans">
-                        Compute My Trajectory
+                        See My Results
                     </button>
                 </div>
             </form>
@@ -302,23 +349,22 @@ string GetHtmlContent(List<Question> questionSet)
                 <div id="loadingState" class="bg-white border border-gray-300 rounded-2xl p-10 shadow-2xl text-center">
                     <div class="animate-pulse flex flex-col items-center">
                         <div class="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin mb-4"></div>
-                        <h2 class="text-2xl font-bold text-gray-800 font-sans">Analyzing Telemetry Vectors...</h2>
-                        <p class="text-gray-500 mt-2">Deducing OCEAN traits, neutralizing bias, and scanning diverse sectors.</p>
+                        <h2 class="text-2xl font-bold text-gray-800 font-sans">Looking for the perfect match...</h2>
+                        <p class="text-gray-500 mt-2">Please wait a few seconds.</p>
                     </div>
                 </div>
 
                 <div id="resultsUI" class="hidden space-y-8">
                     <div class="bg-gray-50 border-l-8 border-black rounded-r-2xl p-8 shadow-lg">
-                        <h2 class="text-3xl font-black text-black mb-6 font-sans uppercase">Your OCEAN Profile</h2>
+                        <h2 class="text-3xl font-black text-black mb-6 font-sans uppercase">Your Personality Profile</h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-lg" id="oceanContent"></div>
                     </div>
 
                     <div id="careersContent" class="space-y-6"></div>
-
                     <div id="otherJobsContainer"></div>
 
                     <div class="bg-black text-white rounded-2xl p-8 shadow-2xl">
-                        <h2 class="text-3xl font-black mb-4 font-sans uppercase">The Verdict</h2>
+                        <h2 class="text-3xl font-black mb-4 font-sans uppercase">Final Thoughts</h2>
                         <p id="synthesisContent" class="text-xl leading-relaxed text-gray-200"></p>
                     </div>
                 </div>
@@ -335,7 +381,7 @@ string GetHtmlContent(List<Question> questionSet)
                 
                 btn.disabled = true;
                 btn.classList.add('opacity-50', 'cursor-not-allowed');
-                btn.innerText = "Processing...";
+                btn.innerText = "Thinking...";
                 
                 outContainer.classList.remove('hidden');
                 loadingState.classList.remove('hidden');
@@ -357,8 +403,8 @@ string GetHtmlContent(List<Question> questionSet)
                     
                     const data = await res.json();
                     
-                    if(data.error) {
-                        alert(data.error);
+                    if(!res.ok || data.error) {
+                        alert(data.error || "Something went wrong. Please try again.");
                         outContainer.classList.add('hidden');
                     } else {
                         renderResults(data);
@@ -366,13 +412,13 @@ string GetHtmlContent(List<Question> questionSet)
                         resultsUI.classList.remove('hidden');
                     }
                 } catch (err) {
-                    alert("Submission error occurred. Please check console.");
+                    alert("Network error. Please check your connection.");
                     console.error(err);
                     outContainer.classList.add('hidden');
                 } finally {
                     btn.disabled = false;
                     btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                    btn.innerText = "Compute My Trajectory";
+                    btn.innerText = "See My Results";
                 }
             });
 
@@ -382,7 +428,7 @@ string GetHtmlContent(List<Question> questionSet)
                     <div><span class="font-bold text-gray-900 block">Conscientiousness</span> <span class="text-gray-700">${data.oceanProfile.conscientiousness}</span></div>
                     <div><span class="font-bold text-gray-900 block">Extraversion</span> <span class="text-gray-700">${data.oceanProfile.extraversion}</span></div>
                     <div><span class="font-bold text-gray-900 block">Agreeableness</span> <span class="text-gray-700">${data.oceanProfile.agreeableness}</span></div>
-                    <div class="md:col-span-2"><span class="font-bold text-gray-900 block">Neuroticism (Stress Resilience)</span> <span class="text-gray-700">${data.oceanProfile.neuroticism}</span></div>
+                    <div class="md:col-span-2"><span class="font-bold text-gray-900 block">Neuroticism</span> <span class="text-gray-700">${data.oceanProfile.neuroticism}</span></div>
                 `;
                 document.getElementById('oceanContent').innerHTML = oceanHtml;
 
@@ -391,10 +437,10 @@ string GetHtmlContent(List<Question> questionSet)
                         <h3 class="text-3xl font-bold text-black mb-6 font-sans border-b-2 border-gray-100 pb-4">${career.title}</h3>
                         <div class="space-y-4 text-lg text-gray-800">
                             <p><strong class="text-black block mb-1">Why This Fits You:</strong> ${career.whyThisFits}</p>
-                            <p><strong class="text-black block mb-1">Where You Will Work:</strong> ${career.workEnvironment}</p>
+                            <p><strong class="text-black block mb-1">Work Opportunities:</strong> ${career.workOpportunities}</p>
                             <p><strong class="text-black block mb-1">A Day in Your Life:</strong> ${career.dayInTheLife}</p>
                             <div class="bg-red-50 text-red-900 p-4 rounded-xl mt-6 border border-red-100">
-                                <strong class="block mb-1">The Challenge & The Growth Strategy:</strong>
+                                <strong class="block mb-1">A Challenge & How to Grow:</strong>
                                 ${career.challengeAndGrowth}
                             </div>
                         </div>
@@ -402,7 +448,6 @@ string GetHtmlContent(List<Question> questionSet)
                 `).join('');
                 document.getElementById('careersContent').innerHTML = careersHtml;
 
-                // Render Other Favorable Jobs
                 if (data.otherFavorableJobs && data.otherFavorableJobs.length > 0) {
                     const otherJobsTags = data.otherFavorableJobs.map(job => 
                         `<span class="inline-block bg-gray-200 text-gray-900 px-4 py-2 rounded-full text-sm font-bold shadow-sm border border-gray-300">${job}</span>`
@@ -410,7 +455,7 @@ string GetHtmlContent(List<Question> questionSet)
                     
                     document.getElementById('otherJobsContainer').innerHTML = `
                         <div class="bg-white border border-gray-300 rounded-2xl p-8 shadow-md">
-                            <h3 class="text-2xl font-bold text-black mb-4 font-sans">Other Favorable Trajectories</h3>
+                            <h3 class="text-2xl font-bold text-black mb-4 font-sans">Other Great Jobs for You</h3>
                             <div class="flex flex-wrap gap-3">
                                 ${otherJobsTags}
                             </div>
