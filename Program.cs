@@ -129,7 +129,7 @@ app.MapPost("/api/evaluate", async (Dictionary<int, int> answers) =>
     try
     {
         var response = await client.Models.GenerateContentAsync(
-            model: "gemini-2.5-flash",
+            model: "gemini-2.0-flash",
             contents: "Analyze my profile telemetry and generate my 3 tailored career paths.",
             config: new GenerateContentConfig
             {
